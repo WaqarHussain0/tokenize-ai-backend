@@ -4,8 +4,9 @@ import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
-import { UserKYCStatusEnum } from '@enums/user/user.enum';
 import { UserReferral } from './user-referrals.entity';
+import { KYCSubmission } from '@modules/kyc/entities/kyc-submission.entity';
+import { UserWallet } from './user-wallet.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -25,14 +26,6 @@ export class User extends CustomBaseEntity {
     type: 'varchar',
   })
   password: string;
-
-  @Column({
-    type: 'enum',
-    enum: UserKYCStatusEnum,
-    default: UserKYCStatusEnum.PENDING,
-  })
-  @AutoMap()
-  kycStatus: UserKYCStatusEnum;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     eager: false,
@@ -79,4 +72,13 @@ export class User extends CustomBaseEntity {
 
   @OneToMany(() => UserReferral, (ref) => ref.referredByUser)
   referrals: UserReferral[];
+
+  @OneToMany(() => KYCSubmission, (kycSubmission) => kycSubmission.user, {
+    onDelete: 'CASCADE',
+    eager: false,
+  })
+  kycSubmissions: KYCSubmission[];
+
+  @OneToMany(() => UserWallet, (wallet) => wallet.user)
+  wallets: UserWallet[];
 }

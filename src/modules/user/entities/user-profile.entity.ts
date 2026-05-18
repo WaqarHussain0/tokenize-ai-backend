@@ -33,7 +33,6 @@ export class UserProfile extends CustomBaseEntity {
   @AutoMap()
   country: string | null;
 
-  /** Role ID for this user. */
   @Column({ type: 'uuid', default: null })
   @AutoMap()
   userId: string;
