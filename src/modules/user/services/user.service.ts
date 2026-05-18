@@ -20,7 +20,6 @@ import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-prof
 import { welcomeEmailTemplate } from '@email-templates/welcome-email.template';
 import { EmailService } from '@modules/app-shared/services/email.service';
 import { UserReferralService } from './user-referrals.service';
-
 @Injectable()
 export class UserService extends AutomapperProfile {
   constructor(

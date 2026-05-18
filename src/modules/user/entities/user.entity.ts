@@ -6,6 +6,7 @@ import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserKYCStatusEnum } from '@enums/user/user.enum';
 import { UserReferral } from './user-referrals.entity';
+import { UserWallet } from './user-wallet.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -78,5 +79,9 @@ export class User extends CustomBaseEntity {
    */
 
   @OneToMany(() => UserReferral, (ref) => ref.referredByUser)
+  sentReferrals: UserReferral[];
+
+  @OneToMany(() => UserWallet, (wallet) => wallet.user)
+  wallets: UserWallet[];
   referrals: UserReferral[];
 }

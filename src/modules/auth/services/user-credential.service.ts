@@ -31,9 +31,9 @@ export class UserCredentialService {
       isUsed: false,
     });
 
-     await this.userCredentialRepo.save(saveEntity);
+    await this.userCredentialRepo.save(saveEntity);
 
-     return {message:"Please check your email for further instructions."}
+    return { message: 'Please check your email for further instructions.' };
   }
 
   async findByToken(resetPasswordToken: string) {
