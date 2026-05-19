@@ -44,6 +44,7 @@ async function bootstrap() {
     .addTag('Patent', 'Patent management endpoints')
     .addTag('User Profile', 'User profile management endpoints')
     .addTag('User Referrals', 'User referrals management endpoints')
+    .addTag('Transaction', 'Transaction management endpoints')
     .addTag('Authentication', 'Authentication endpoints')
 
     .build();

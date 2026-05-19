@@ -6,6 +6,7 @@ import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserReferral } from './user-referrals.entity';
 import { KYCSubmission } from '@modules/kyc/entities/kyc-submission.entity';
+import { Transaction } from '@modules/transaction/entities/transaction.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -51,6 +52,10 @@ export class User extends CustomBaseEntity {
   @AutoMap()
   emailVerified: boolean;
 
+  @Column({ type: 'varchar', default: 'investor' })
+  @AutoMap()
+  role: string;
+
   /**
    * Unique referral code owned by this user.
    * Used in signup links like: ?ref=ABC123
@@ -78,4 +83,10 @@ export class User extends CustomBaseEntity {
     eager: false,
   })
   kycSubmissions: KYCSubmission[];
+
+  @OneToMany(() => Transaction, (trx) => trx.user, {
+    onDelete: 'CASCADE',
+    eager: false,
+  })
+  transactions: Transaction[];
 }
