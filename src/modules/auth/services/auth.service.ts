@@ -85,6 +85,12 @@ export class AuthService extends AutomapperProfile {
     // Find user by email
     const user = await this.userService.findByEmail(email, true);
 
+    if (!user.emailVerified) {
+      throw new UnauthorizedException(
+        'Email not verified, please verify your email',
+      );
+    }
+
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -126,7 +132,23 @@ export class AuthService extends AutomapperProfile {
       throw new UnauthorizedException('Email not found');
     }
 
-    return await this.userCredentialService.fortgotPassword(user.id);
+    return await this.userCredentialService.fortgotPassword(
+      user.id,
+      user.email,
+    );
+  }
+
+  async resendResetPasswordEmail(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Email not found');
+    }
+
+    return await this.userCredentialService.resendResetPasswordEmail(
+      user.id,
+      user.email,
+    );
   }
 
   async resetPassword(payload: ResetPasswordDto) {
@@ -149,7 +171,7 @@ export class AuthService extends AutomapperProfile {
     return true;
   }
 
-  async verifyEmail(email: string) {
-    return await this.userService.verifyEmail(email);
+  async verifyEmail(token: string) {
+    return await this.userService.verifyEmail(token);
   }
 }

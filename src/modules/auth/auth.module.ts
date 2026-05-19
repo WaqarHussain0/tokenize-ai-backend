@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './guards';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserCredential } from './entities/user-credential.entity';
 import { UserCredentialService } from './services/user-credential.service';
+import AppSharedModule from '@modules/app-shared/app-shared.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserCredentialService } from './services/user-credential.service';
     }),
 
     forwardRef(() => UserModule),
+    forwardRef(() => AppSharedModule),
   ],
 
   providers: [AuthService, JwtAuthGuard, UserCredentialService],

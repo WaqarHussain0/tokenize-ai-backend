@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { UserProfileService } from '../services/user-profile.service';
 import { SetUserProfileDto } from '@requestable-dto/user/profile/set-user-profilt.dto';
+import { SaveUserWalletDto } from '@requestable-dto/user/profile/save-user-wallet.dto';
 import { User } from '../entities/user.entity';
 import { CurrentUser, Public } from '@modules/auth/decorators';
 import { JwtAuthGuard } from '@modules/auth/guards';
@@ -40,6 +41,20 @@ export class UserProfileController {
   ) {
     return await this.userProfileService.setProfile(payload, user.id);
   }
+
+  @Post('save-wallet')
+  @ApiOperation({
+    summary: 'Save user wallet',
+    description:
+      'Stores the public wallet address and provider on the user profile',
+  })
+  async saveWallet(
+    @Body() payload: SaveUserWalletDto,
+    @CurrentUser() user: User,
+  ) {
+    return await this.userProfileService.saveWallet(payload, user.id);
+  }
+
   @Public()
   @Get(':userId')
   @HttpCode(HttpStatus.OK)

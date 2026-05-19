@@ -11,10 +11,11 @@ import AppSharedModule from '@modules/app-shared/app-shared.module';
 import { UserReferral } from './entities/user-referrals.entity';
 import { UserReferralService } from './services/user-referrals.service';
 import { UserReferralController } from './controllers/user-referrals.controller';
+import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserProfile, UserReferral]),
+    TypeOrmModule.forFeature([User, UserProfile, UserReferral, UserCredential]),
     AppSharedModule,
     forwardRef(() => AuthModule),
   ],

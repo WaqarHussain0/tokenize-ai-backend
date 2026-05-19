@@ -6,13 +6,22 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+
 import { AuthService } from '../services/auth.service';
+
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+
 import { CreateUserDto } from '@requestable-dto/user/create-user.dto';
+
 import { Public } from '../decorators';
+
 import { LoginDto } from '@requestable-dto/auth/login.dto';
+
 import { EmailDto } from '@requestable-dto/common/email.dto';
+
 import { ResetPasswordDto } from '@requestable-dto/auth/reset-password.dto';
+
+import { TokenDto } from '@requestable-dto/common/token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -24,10 +33,12 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'User login',
+
     description: 'Authenticate user with email and password, returns JWT token',
   })
   @ApiBody({
     type: LoginDto,
+
     description: 'Login credentials',
   })
   async login(@Body() loginDto: LoginDto) {
@@ -38,10 +49,12 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'User registration',
+
     description: 'Register a new user with email and password',
   })
   @ApiBody({
     type: CreateUserDto,
+
     description: 'User registration details',
   })
   async register(@Body() payload: CreateUserDto) {
@@ -53,14 +66,33 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'Forgot password initiation',
+
     description: 'Initiate the forgot password process for a user',
   })
   @ApiBody({
     type: EmailDto,
+
     description: 'User email for password reset',
   })
   async forgotPassword(@Body() payload: EmailDto) {
     return await this.authService.forgotPassword(payload.email);
+  }
+
+  @Post('resend-email')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @ApiOperation({
+    summary: 'Resend reset password email',
+
+    description: 'Resend reset password email to the user',
+  })
+  @ApiBody({
+    type: EmailDto,
+
+    description: 'User email for resend reset password email',
+  })
+  async resendResetPasswordEmail(@Body() payload: EmailDto) {
+    return await this.authService.resendResetPasswordEmail(payload.email);
   }
 
   @Patch('reset-password')
@@ -68,10 +100,12 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'Reset password via token',
+
     description: 'Reset password using token and new password',
   })
   @ApiBody({
     type: ResetPasswordDto,
+
     description: 'Reset password payload',
   })
   async resetPassword(
@@ -91,16 +125,18 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'Verify email',
-    description: 'Verify user email address',
+
+    description: 'Verify user email address using verification token',
   })
   @ApiBody({
-    type: EmailDto,
-    description: 'Email verification payload',
+    type: TokenDto,
+
+    description: 'Token for email verification',
   })
   async verifyEmail(
-    @Body() payload: EmailDto,
+    @Body() payload: TokenDto,
   ): Promise<{ message: string; success: boolean }> {
-    const response = await this.authService.verifyEmail(payload.email);
+    const response = await this.authService.verifyEmail(payload.token);
 
     if (response) {
       return { message: 'Email verified successfully', success: true };

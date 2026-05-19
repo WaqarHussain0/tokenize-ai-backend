@@ -6,10 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from '../config/index';
 import { UserModule } from '@modules/user/user.module';
 import AuthModule from '@modules/auth/auth.module';
-
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { PatentModule } from '@modules/patent/patent.module';
+
 import AppSharedModule from '@modules/app-shared/app-shared.module';
 
 @Module({

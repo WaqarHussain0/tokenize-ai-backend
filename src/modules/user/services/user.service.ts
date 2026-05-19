@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
@@ -20,6 +20,9 @@ import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-prof
 import { welcomeEmailTemplate } from '@email-templates/welcome-email.template';
 import { EmailService } from '@modules/app-shared/services/email.service';
 import { UserReferralService } from './user-referrals.service';
+import { randomBytes } from 'crypto';
+import { verifyEmailTemplate } from '@email-templates/verify-email.template';
+import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 
 @Injectable()
 export class UserService extends AutomapperProfile {
@@ -28,6 +31,9 @@ export class UserService extends AutomapperProfile {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(UserCredential)
+    private readonly userCredentialRepository: Repository<UserCredential>,
 
     private readonly emailService: EmailService,
 
@@ -133,6 +139,34 @@ export class UserService extends AutomapperProfile {
     });
   }
 
+  async sendVerificationEmail(user: User) {
+    const token = randomBytes(15).toString('hex'); // 15 characters
+
+    const expiry = new Date();
+    expiry.setMinutes(expiry.getMinutes() + 10); // expires in 10 minutes
+
+    await this.userCredentialRepository.save(
+      this.userCredentialRepository.create({
+        userId: user.id,
+        resetPasswordToken: token,
+        expiry: expiry,
+        isUsed: false,
+      }),
+    );
+
+    // Prepare Email Verification Template
+    const html = verifyEmailTemplate({
+      verifyEmailLink: `${process.env.FRONTEND_URL}/verify-email?token=${token}`,
+    });
+
+    // Send Email Verification Email
+    await this.emailService.sendMail({
+      subject: 'Tokenize AI - Verify Email',
+      html,
+      to: user.email,
+    });
+  }
+
   async create(payload: CreateUserDto) {
     const { email, password, referralCode } = payload;
 
@@ -207,6 +241,8 @@ export class UserService extends AutomapperProfile {
       to: savedUser.email,
     });
 
+    await this.sendVerificationEmail(savedUser);
+
     return savedUser;
   }
 
@@ -269,11 +305,33 @@ export class UserService extends AutomapperProfile {
     return new PageDto(mappedUsers, pageMetaDto);
   }
 
-  async verifyEmail(email: string) {
-    return await this.userRepository.update(
-      { email: email.toLowerCase().trim() },
+  async verifyEmail(token: string) {
+    // 1. find token in credentials table
+    const record = await this.userCredentialRepository.findOne({
+      where: {
+        resetPasswordToken: token,
+        isUsed: false,
+        expiry: MoreThan(new Date()),
+      },
+    });
+
+    if (!record) {
+      throw new Error('Invalid or expired token');
+    }
+
+    // 2. mark user as verified (USERS table)
+    await this.userRepository.update(
+      { id: record.userId },
       { emailVerified: true },
     );
+
+    // 3. mark token as used (CREDENTIALS table)
+    await this.userCredentialRepository.update(
+      { id: record.id },
+      { isUsed: true },
+    );
+
+    return { message: 'Email verified successfully' };
   }
 
   async toggleUserActiveStatus(userId: string) {

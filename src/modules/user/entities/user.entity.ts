@@ -6,7 +6,6 @@ import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserReferral } from './user-referrals.entity';
 import { KYCSubmission } from '@modules/kyc/entities/kyc-submission.entity';
-import { UserWallet } from './user-wallet.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -39,6 +38,7 @@ export class User extends CustomBaseEntity {
     eager: false,
     onDelete: 'CASCADE',
   })
+  s;
   @JoinColumn()
   credential: UserCredential;
 
@@ -78,7 +78,4 @@ export class User extends CustomBaseEntity {
     eager: false,
   })
   kycSubmissions: KYCSubmission[];
-
-  @OneToMany(() => UserWallet, (wallet) => wallet.user)
-  wallets: UserWallet[];
 }

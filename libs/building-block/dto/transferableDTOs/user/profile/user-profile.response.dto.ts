@@ -24,4 +24,10 @@ export class UserProfileResponseDto {
 
   @AutoMap()
   userId: string;
+
+  @AutoMap()
+  walletAddress: string | null;
+
+  @AutoMap()
+  provider: string | null;
 }

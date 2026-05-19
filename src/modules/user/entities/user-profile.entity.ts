@@ -49,4 +49,12 @@ export class UserProfile extends CustomBaseEntity {
   @Column({ type: 'varchar', nullable: true, default: '' })
   @AutoMap()
   companyRegNo: string;
+
+  @Column({ type: 'varchar', unique: true, length: 100, nullable: true })
+  @AutoMap()
+  walletAddress: string | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  @AutoMap()
+  provider: string | null;
 }
