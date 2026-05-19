@@ -45,8 +45,10 @@ export class CreateTransactionDto {
 
   @ApiProperty({
     description: 'Value of the transaction',
-    example: '6.55 $',
+    example: '6.55',
   })
+  @IsString()
+  @IsNotEmpty()
   value: string;
 
   @ApiProperty({

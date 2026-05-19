@@ -12,6 +12,9 @@ export class UserResponseDto {
   isActive: boolean;
 
   @AutoMap()
+  role: string;
+
+  @AutoMap()
   emailVerified: boolean;
 
   @AutoMap(() => UserProfileResponseDto)

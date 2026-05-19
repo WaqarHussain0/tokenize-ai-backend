@@ -52,6 +52,10 @@ export class User extends CustomBaseEntity {
   @AutoMap()
   emailVerified: boolean;
 
+  @Column({ type: 'varchar', default: 'investor' })
+  @AutoMap()
+  role: string;
+
   /**
    * Unique referral code owned by this user.
    * Used in signup links like: ?ref=ABC123
