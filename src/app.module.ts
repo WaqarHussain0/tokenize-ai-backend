@@ -11,6 +11,7 @@ import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { PatentModule } from '@modules/patent/patent.module';
 import AppSharedModule from '@modules/app-shared/app-shared.module';
+import { TransactionModule } from '@modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import AppSharedModule from '@modules/app-shared/app-shared.module';
     }),
 
     UserModule,
+    TransactionModule,
     AuthModule,
     PatentModule,
     AppSharedModule,

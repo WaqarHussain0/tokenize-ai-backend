@@ -7,6 +7,7 @@ import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-prof
 import { UserReferral } from './user-referrals.entity';
 import { KYCSubmission } from '@modules/kyc/entities/kyc-submission.entity';
 import { UserWallet } from './user-wallet.entity';
+import { Transaction } from '@modules/transaction/entities/transaction.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -78,6 +79,12 @@ export class User extends CustomBaseEntity {
     eager: false,
   })
   kycSubmissions: KYCSubmission[];
+
+  @OneToMany(() => Transaction, (trx) => trx.user, {
+    onDelete: 'CASCADE',
+    eager: false,
+  })
+  transactions: Transaction[];
 
   @OneToMany(() => UserWallet, (wallet) => wallet.user)
   wallets: UserWallet[];

@@ -35,6 +35,7 @@ export default abstract class CustomBaseEntity extends BaseEntity {
     example: '2023-01-01T00:00:00.000Z',
     readOnly: true,
   })
+  @AutoMap()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
@@ -46,6 +47,7 @@ export default abstract class CustomBaseEntity extends BaseEntity {
     example: '2023-01-02T00:00:00.000Z',
     readOnly: true,
   })
+  @AutoMap()
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
@@ -57,6 +59,7 @@ export default abstract class CustomBaseEntity extends BaseEntity {
     nullable: true,
     readOnly: true,
   })
+  @AutoMap()
   @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date;
 
@@ -66,12 +69,15 @@ export default abstract class CustomBaseEntity extends BaseEntity {
     default: false,
     readOnly: true,
   })
+  @AutoMap()
   @Column({ type: 'boolean', default: false })
   isDelete: boolean;
 
   @Column({ type: 'uuid', nullable: true })
+  @AutoMap()
   createdById: string;
 
   @Column({ type: 'uuid', nullable: true })
+  @AutoMap()
   updatedById: string;
 }
