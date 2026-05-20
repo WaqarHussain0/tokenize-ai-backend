@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { MoreThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
@@ -23,6 +23,7 @@ import { UserReferralService } from './user-referrals.service';
 import { randomBytes } from 'crypto';
 import { verifyEmailTemplate } from '@email-templates/verify-email.template';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
+import { TokenTypeEnum } from '@enums/auth/user-credential.enum';
 
 @Injectable()
 export class UserService extends AutomapperProfile {
@@ -148,8 +149,9 @@ export class UserService extends AutomapperProfile {
     await this.userCredentialRepository.save(
       this.userCredentialRepository.create({
         userId: user.id,
-        resetPasswordToken: token,
+        token,
         expiry: expiry,
+        type: TokenTypeEnum.EMAIL_VERIFICATION,
         isUsed: false,
       }),
     );
@@ -306,12 +308,12 @@ export class UserService extends AutomapperProfile {
   }
 
   async verifyEmail(token: string) {
-    // 1. find token in credentials table
+    // 1. Find valid token
     const record = await this.userCredentialRepository.findOne({
       where: {
-        resetPasswordToken: token,
+        token,
+        type: TokenTypeEnum.EMAIL_VERIFICATION,
         isUsed: false,
-        expiry: MoreThan(new Date()),
       },
     });
 
@@ -319,19 +321,27 @@ export class UserService extends AutomapperProfile {
       throw new Error('Invalid or expired token');
     }
 
-    // 2. mark user as verified (USERS table)
+    // 2. Mark user as verified
     await this.userRepository.update(
       { id: record.userId },
       { emailVerified: true },
     );
 
-    // 3. mark token as used (CREDENTIALS table)
+    // 3. Mark ALL email verification tokens as used
     await this.userCredentialRepository.update(
-      { id: record.id },
-      { isUsed: true },
+      {
+        userId: record.userId,
+        type: TokenTypeEnum.EMAIL_VERIFICATION,
+        isUsed: false,
+      },
+      {
+        isUsed: true,
+      },
     );
 
-    return { message: 'Email verified successfully' };
+    return {
+      message: 'Email verified successfully',
+    };
   }
 
   async toggleUserActiveStatus(userId: string) {

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany } from 'typeorm';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { User } from '@modules/user/entities/user.entity';
 
@@ -7,7 +7,14 @@ export class UserCredential extends CustomBaseEntity {
   @Column({
     type: 'varchar',
   })
-  resetPasswordToken: string;
+  token: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  type: string; // type token for ? email verification or reset password
 
   @Column({ type: 'timestamp', nullable: true, default: null })
   expiry: Date;
@@ -15,7 +22,8 @@ export class UserCredential extends CustomBaseEntity {
   @Column({ type: 'uuid', nullable: true, default: null })
   userId: string;
 
-  @OneToOne(() => User, (user) => user.credential)
+  @OneToMany(() => User, (user) => user.credential)
+  @JoinColumn()
   user: User;
 
   @Column({ type: 'boolean', default: false })

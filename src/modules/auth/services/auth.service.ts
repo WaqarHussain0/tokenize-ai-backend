@@ -16,6 +16,13 @@ import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import { LoginResponseDto } from '@transferable-dto/auth/login.response.dto';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserProfile } from '@modules/user/entities/user-profile.entity';
+import { TokenTypeEnum } from '@enums/auth/user-credential.enum';
+import { verifyEmailTemplate } from '@email-templates/verify-email.template';
+import { EmailService } from '@modules/app-shared/services/email.service';
+import { randomBytes } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserCredential } from '../entities/user-credential.entity';
 
 export interface JwtPayload {
   sub: string;
@@ -30,6 +37,10 @@ export class AuthService extends AutomapperProfile {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly userCredentialService: UserCredentialService,
+    private readonly emailService: EmailService,
+
+    @InjectRepository(UserCredential)
+    private readonly userCredentialRepository: Repository<UserCredential>,
   ) {
     super(mapper);
   }
@@ -79,21 +90,49 @@ export class AuthService extends AutomapperProfile {
     return await this.userService.create(payload);
   }
 
+  async emailVerificationCheck(user: User) {
+    // If email not verified
+    if (!user.emailVerified) {
+      const token = randomBytes(32).toString('hex');
+
+      await this.userCredentialRepository.save(
+        this.userCredentialRepository.create({
+          userId: user.id,
+          token,
+          type: TokenTypeEnum.EMAIL_VERIFICATION,
+          isUsed: false,
+        }),
+      );
+
+      const html = verifyEmailTemplate({
+        verifyEmailLink: `${process.env.FRONTEND_URL}/verify-email?token=${token}`,
+      });
+
+      // Send Email Verification Email
+      await this.emailService.sendMail({
+        subject: 'Tokenize AI - Verify Email',
+        html,
+        to: user.email,
+      });
+
+      // Throw exception with message
+      throw new UnauthorizedException(
+        'Your email is not verified. A verification email has been sent to your inbox.',
+      );
+    }
+  }
+
   async login(payload: LoginDto): Promise<any> {
     const { email, password } = payload;
 
     // Find user by email
     const user = await this.userService.findByEmail(email, true);
 
-    if (!user.emailVerified) {
-      throw new UnauthorizedException(
-        'Email not verified, please verify your email',
-      );
-    }
-
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    await this.emailVerificationCheck(user);
 
     // Validate password
     const isPasswordValid = await this.userService.validatePassword(
@@ -159,7 +198,8 @@ export class AuthService extends AutomapperProfile {
     if (
       !userCredentials ||
       userCredentials.isUsed ||
-      userCredentials.expiry < new Date()
+      userCredentials.expiry < new Date() ||
+      userCredentials.type !== TokenTypeEnum.RESET_PASSWORD
     ) {
       throw new NotFoundException('Invalid or expired token');
     }

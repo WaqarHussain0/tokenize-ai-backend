@@ -5,6 +5,7 @@ import { UserCredential } from '../entities/user-credential.entity';
 import { randomBytes } from 'crypto';
 import { EmailService } from '@modules/app-shared/services/email.service';
 import { forgotPasswordTemplate } from '@email-templates/forgot-password.template';
+import { TokenTypeEnum } from '@enums/auth/user-credential.enum';
 
 @Injectable()
 export class UserCredentialService {
@@ -17,7 +18,7 @@ export class UserCredentialService {
   async fortgotPassword(userId: string, email: string) {
     // Mark all previous unused reset tokens as used
     await this.userCredentialRepo.update(
-      { isUsed: false, userId },
+      { isUsed: false, userId, type: TokenTypeEnum.RESET_PASSWORD },
       { isUsed: true },
     );
 
@@ -29,9 +30,10 @@ export class UserCredentialService {
 
     const saveEntity = this.userCredentialRepo.create({
       userId,
-      resetPasswordToken: token,
+      token,
       expiry,
       isUsed: false,
+      type: TokenTypeEnum.RESET_PASSWORD,
     });
 
     await this.userCredentialRepo.save(saveEntity);
@@ -72,7 +74,7 @@ export class UserCredentialService {
 
     // Mark all previous tokens as used
     await this.userCredentialRepo.update(
-      { userId, isUsed: false },
+      { userId, isUsed: false, type: TokenTypeEnum.RESET_PASSWORD },
       { isUsed: true },
     );
 
@@ -86,8 +88,9 @@ export class UserCredentialService {
     await this.userCredentialRepo.save(
       this.userCredentialRepo.create({
         userId,
-        resetPasswordToken: token,
+        token,
         expiry,
+        type: TokenTypeEnum.RESET_PASSWORD,
         isUsed: false,
       }),
     );
@@ -99,7 +102,7 @@ export class UserCredentialService {
 
     // Send email
     await this.emailService.sendMail({
-      subject: 'Tokenize AI - Resend Reset Passowrd Request',
+      subject: 'Tokenize AI - Reset Passowrd Request',
       html,
       to: email,
     });
@@ -109,9 +112,13 @@ export class UserCredentialService {
     };
   }
 
-  async findByToken(resetPasswordToken: string) {
+  async findByToken(token: string) {
     return await this.userCredentialRepo.findOne({
-      where: { resetPasswordToken, expiry: MoreThan(new Date()) },
+      where: {
+        token,
+        expiry: MoreThan(new Date()),
+        type: TokenTypeEnum.RESET_PASSWORD,
+      },
     });
   }
 
