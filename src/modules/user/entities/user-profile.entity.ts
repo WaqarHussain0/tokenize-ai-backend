@@ -52,9 +52,9 @@ export class UserProfile extends CustomBaseEntity {
 
   @Column({ type: 'varchar', unique: true, length: 100, nullable: true })
   @AutoMap()
-  walletAddress: string | null;
+  walletAddress: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   @AutoMap()
-  provider: string | null;
+  provider: string;
 }

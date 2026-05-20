@@ -57,7 +57,8 @@ export class UserProfileService extends AutomapperProfile {
     return await this.userProfile.save(profile);
   }
 
-  async saveWallet(payload: SaveUserWalletDto, userId: string) {
+  async saveWallet(payload: SaveUserWalletDto) {
+    const userId = payload.userId;
     await this.userService.findById(userId);
 
     const normalizedAddress = payload.walletAddress.trim();
@@ -73,7 +74,6 @@ export class UserProfileService extends AutomapperProfile {
     }
 
     const profile = await this.getProfileByUserId(userId);
-
 
     profile.walletAddress = normalizedAddress;
     profile.provider = payload.provider?.trim() ?? null;

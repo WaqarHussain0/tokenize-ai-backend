@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class SaveUserWalletDto {
   @ApiProperty({
@@ -11,12 +11,20 @@ export class SaveUserWalletDto {
   @MaxLength(100)
   walletAddress: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Wallet provider (e.g. phantom)',
     example: 'phantom',
   })
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @MaxLength(50)
-  provider?: string;
+  provider: string;
+
+  @ApiProperty({
+    description: 'User ID associated with the transaction',
+    example: '09d927cb-f911-4ace-a069-ff2a935f56b3',
+  })
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }

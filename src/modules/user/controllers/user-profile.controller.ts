@@ -42,17 +42,15 @@ export class UserProfileController {
     return await this.userProfileService.setProfile(payload, user.id);
   }
 
+  @Public()
   @Post('save-wallet')
   @ApiOperation({
     summary: 'Save user wallet',
     description:
       'Stores the public wallet address and provider on the user profile',
   })
-  async saveWallet(
-    @Body() payload: SaveUserWalletDto,
-    @CurrentUser() user: User,
-  ) {
-    return await this.userProfileService.saveWallet(payload, user.id);
+  async saveWallet(@Body() payload: SaveUserWalletDto) {
+    return await this.userProfileService.saveWallet(payload);
   }
 
   @Public()
